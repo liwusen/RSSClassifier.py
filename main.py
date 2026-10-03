@@ -200,7 +200,8 @@ if __name__ == "__main__":
             print("[", url, "] Skiped")
         if url.startswith("!"):
             break
-    cl.pruning(alpha=0.03)
+            
+#    cl.pruning(alpha=0.03)
     cl.saveToFile()
     print(
         "[Main] 总训练：",
