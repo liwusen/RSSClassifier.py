@@ -1,0 +1,41 @@
+name: Daily Train
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily training
+        run: python main.py
+
+      - name: Commit and push updated model
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add rss.json classifierTrained.json
+          if ! git diff --staged --quiet; then
+            if git log -1 --pretty=%s | grep -q "^\[auto\]"; then
+              git commit --amend -m "[auto] daily training $(date +%Y-%m-%d)"
+              git push --force-with-lease
+            else
+              git commit -m "[auto] daily training $(date +%Y-%m-%d)"
+              git push
+            fi
+          fi
